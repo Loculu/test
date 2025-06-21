@@ -1,0 +1,10 @@
+services:
+  tts_app:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./generated_files:/app/generated_files
+      - ./logs:/var/log/tts
+    environment:
+      USERS: "Admin:Admin"
