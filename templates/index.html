@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Text zu Sprache</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script>
+    let auth = localStorage.getItem('auth');
+    if (!auth) {
+      const user = prompt('Benutzer:');
+      const pass = prompt('Passwort:');
+      auth = btoa(`${user}:${pass}`);
+      localStorage.setItem('auth', auth);
+    }
+    const AUTH_HEADER = 'Basic ' + auth;
+
+    function authFetch(url, opts = {}) {
+      opts.headers = opts.headers || {};
+      opts.headers['Authorization'] = AUTH_HEADER;
+      if (opts.method && opts.method.toUpperCase() === 'POST') {
+        opts.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+      }
+      return fetch(url, opts);
+    }
+
+    function generateTTS() {
+      const text = encodeURIComponent(document.getElementById('text').value);
+      authFetch('/generate', {
+        method: 'POST',
+        body: `text=${text}`
+      })
+      .then(resp => {
+        if (!resp.ok) throw new Error(resp.status);
+        document.getElementById('status').innerText = 'Datei wird erstellt…';
+        pollStatus();
+      })
+      .catch(err => {
+        document.getElementById('status').innerText = 'Fehler beim Generieren';
+        console.error(err);
+      });
+    }
+
+    function pollStatus() {
+      authFetch('/status')
+        .then(r => r.json())
+        .then(data => {
+          if (data.processing) {
+            setTimeout(pollStatus, 1000);
+          } else {
+            document.getElementById('status').innerText = 'Bereit';
+            loadAudio();
+          }
+        })
+        .catch(() => {
+          document.getElementById('status').innerText = 'Nicht eingeloggt';
+        });
+    }
+
+    function loadAudio() {
+      const player = document.getElementById('player');
+      const delBtn = document.getElementById('delete-btn');
+
+      authFetch('/audio/audio.wav')
+        .then(r => {
+          if (!r.ok) throw new Error(r.status);
+          return r.blob();
+        })
+        .then(blob => {
+          const url = URL.createObjectURL(blob);
+          player.src = url;
+          player.style.display = 'block';
+          delBtn.style.display = 'inline-block';
+        })
+        .catch(() => {
+          player.style.display = 'none';
+          delBtn.style.display = 'none';
+        });
+    }
+
+    function deleteAudio() {
+      authFetch('/delete', { method: 'POST' })
+        .then(resp => {
+          if (!resp.ok) throw new Error(resp.status);
+          document.getElementById('status').innerText = 'Gelöscht';
+          const player = document.getElementById('player');
+          const delBtn = document.getElementById('delete-btn');
+          player.src = '';
+          player.style.display = 'none';
+          delBtn.style.display = 'none';
+        })
+        .catch(err => console.error(err));
+    }
+
+    window.onload = () => {
+      pollStatus();
+      loadAudio();
+    };
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Text zu Sprache</h1>
+
+    <textarea id="text" placeholder="Hier Text eingeben…"></textarea>
+    <button type="button" class="btn btn-primary" onclick="generateTTS()">Generieren</button>
+
+    <div id="status">Lade…</div>
+
+    <audio id="player" controls style="display:none; width:100%; margin:1rem 0;"></audio>
+    <button id="delete-btn" type="button" class="btn btn-delete" onclick="deleteAudio()" style="display:none;">
+      Löschen
+    </button>
+  </div>
+</body>
+</html>
