@@ -1,0 +1,35 @@
+Python
+Lizenz: Python Software Foundation License v2.0
+https://docs.python.org/3/license.html
+
+Flask
+Lizenz: BSD-3-Clause
+https://github.com/pallets/flask/blob/main/LICENSE
+
+Flask-HTTPAuth
+Lizenz: MIT
+https://github.com/miguelgrinberg/Flask-HTTPAuth/blob/main/LICENSE
+
+python-dotenv
+Lizenz: BSD-3-Clause
+https://github.com/theskumar/python-dotenv/blob/main/LICENSE
+
+waitress
+Lizenz: MIT
+https://github.com/Pylons/waitress/blob/master/LICENSE
+
+piper-tts
+Lizenz: MIT
+https://pypi.org/project/piper-tts/
+
+curl
+Lizenz: MIT/X-Derivative
+https://github.com/curl/curl/blob/master/COPYING
+
+cron
+Lizenz: ISC
+https://opensource.org/licenses/ISC
+
+logrotate
+Lizenz: GPL-2.0
+https://github.com/logrotate/logrotate/blob/master/COPYING
