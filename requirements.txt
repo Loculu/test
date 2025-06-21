@@ -1,0 +1,5 @@
+flask
+flask-httpauth
+python-dotenv
+piper-tts
+waitress
